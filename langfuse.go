@@ -68,6 +68,21 @@ func (l *Langfuse) Trace(t *model.Trace) (*model.Trace, error) {
 	return t, nil
 }
 
+func (l *Langfuse) UpdateTrace(t *model.Trace) (*model.Trace, error) {
+	if t.ID == "" {
+		return nil, fmt.Errorf("trace ID is required")
+	}
+	l.observer.Dispatch(
+		model.IngestionEvent{
+			ID:        buildID(nil),
+			Type:      model.IngestionEventTypeTraceCreate,
+			Timestamp: time.Now().UTC(),
+			Body:      t,
+		},
+	)
+	return t, nil
+}
+
 func (l *Langfuse) Generation(g *model.Generation, parentID *string) (*model.Generation, error) {
 	if g.TraceID == "" {
 		traceID, err := l.createTrace(g.Name)
