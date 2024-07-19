@@ -1,7 +1,7 @@
 # Langfuse Go SDK
 
 
-[![GoDoc](https://godoc.org/github.com/henomis/langfuse-go?status.svg)](https://godoc.org/github.com/henomis/langfuse-go) [![Go Report Card](https://goreportcard.com/badge/github.com/henomis/langfuse-go)](https://goreportcard.com/report/github.com/henomis/langfuse-go) [![GitHub release](https://img.shields.io/github/release/henomis/langfuse-go.svg)](https://github.com/henomis/langfuse-go/releases)
+[![GoDoc](https://godoc.org/github.com/m1heng/langfuse-go?status.svg)](https://godoc.org/github.com/m1heng/langfuse-go) [![Go Report Card](https://goreportcard.com/badge/github.com/m1heng/langfuse-go)](https://goreportcard.com/report/github.com/m1heng/langfuse-go) [![GitHub release](https://img.shields.io/github/release/henomis/langfuse-go.svg)](https://github.com/m1heng/langfuse-go/releases)
 
 This is [Langfuse](https://langfuse.com)'s **unofficial** Go client, designed to enable you to use Langfuse's services easily from your own applications.
 
@@ -29,7 +29,7 @@ This is [Langfuse](https://langfuse.com)'s **unofficial** Go client, designed to
 
 You can load langfuse-go into your project by using:
 ```
-go get github.com/henomis/langfuse-go
+go get github.com/m1heng/langfuse-go
 ```
 
 
@@ -53,8 +53,8 @@ package main
 import (
 	"context"
 
-	"github.com/henomis/langfuse-go"
-	"github.com/henomis/langfuse-go/model"
+	"github.com/m1heng/langfuse-go"
+	"github.com/m1heng/langfuse-go/model"
 )
 
 func main() {
