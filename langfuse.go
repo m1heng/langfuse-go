@@ -234,8 +234,10 @@ func (l *Langfuse) createTrace(traceName string) (string, error) {
 	if errTrace != nil {
 		return "", errTrace
 	}
-
-	return trace.ID, fmt.Errorf("unable to get trace ID")
+	if trace != nil {
+		return trace.ID, nil
+	}
+	return "", fmt.Errorf("unable to get trace ID")
 }
 
 func (l *Langfuse) Flush(ctx context.Context) {
