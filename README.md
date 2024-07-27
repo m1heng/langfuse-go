@@ -146,6 +146,5 @@ func main() {
 }
 ```
 
-## Who uses langfuse-go?
-
-* [LinGoose](https://github.com/henomis/lingoose) Go framework for building awesome LLM apps
+## Originally forked from
+https://github.com/henomis/langfuse-go
