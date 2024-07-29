@@ -21,29 +21,31 @@ type Langfuse struct {
 	observer      *observer.Observer[model.IngestionEvent]
 }
 
-func New(ctx context.Context) *Langfuse {
-	client := api.New()
+type APIConfig = api.ClientConfig
 
+type Config struct {
+	ApiClientConfig   *APIConfig
+	AutoFlushInterval time.Duration
+}
+
+func New(ctx context.Context, config *Config) (*Langfuse, error) {
+	client := api.New(config.ApiClientConfig)
 	l := &Langfuse{
 		flushInterval: defaultFlushInterval,
 		client:        client,
 		observer: observer.NewObserver(
-			ctx,
 			func(ctx context.Context, events []model.IngestionEvent) {
 				err := ingest(ctx, client, events)
 				if err != nil {
 					fmt.Println(err)
 				}
 			},
+			&config.AutoFlushInterval,
 		),
 	}
 
-	return l
-}
-
-func (l *Langfuse) WithFlushInterval(d time.Duration) *Langfuse {
-	l.flushInterval = d
-	return l
+	l.observer.Start(ctx)
+	return l, nil
 }
 
 func ingest(ctx context.Context, client *api.Client, events []model.IngestionEvent) error {

@@ -12,21 +12,18 @@ type Observer[T any] struct {
 	handler *handler[T]
 }
 
-func NewObserver[T any](ctx context.Context, fn EventHandler[T]) *Observer[T] {
+func NewObserver[T any](fn EventHandler[T], tickDuration *time.Duration) *Observer[T] {
 	queue := newQueue[T]()
 
 	o := &Observer[T]{
 		queue:   queue,
-		handler: newHandler(queue, fn),
+		handler: newHandler(queue, fn).withTick(*tickDuration),
 	}
-	go o.handler.listen(ctx)
-
 	return o
 }
 
-func (o *Observer[T]) WithTick(tick time.Duration) *Observer[T] {
-	o.handler.withTick(tick)
-	return o
+func (o *Observer[T]) Start(ctx context.Context) {
+	go o.handler.listen(ctx)
 }
 
 func (o *Observer[T]) Dispatch(event T) {
