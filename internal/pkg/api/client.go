@@ -17,18 +17,24 @@ type Client struct {
 	restClient *restclientgo.RestClient
 }
 
-func New() *Client {
-	langfuseHost := os.Getenv("LANGFUSE_HOST")
-	if langfuseHost == "" {
-		langfuseHost = langfuseDefaultEndpoint
+type ClientConfig struct {
+	LangfuseHost string
+	PublicKey    string
+	SecretKey    string
+}
+
+func New(config *ClientConfig) *Client {
+	if config == nil {
+		config = &ClientConfig{
+			LangfuseHost: os.Getenv("LANGFUSE_HOST"),
+			PublicKey:    os.Getenv("LANGFUSE_PUBLIC_KEY"),
+			SecretKey:    os.Getenv("LANGFUSE_SECRET_KEY"),
+		}
 	}
 
-	publicKey := os.Getenv("LANGFUSE_PUBLIC_KEY")
-	secretKey := os.Getenv("LANGFUSE_SECRET_KEY")
-
-	restClient := restclientgo.New(langfuseHost)
+	restClient := restclientgo.New(config.LangfuseHost)
 	restClient.SetRequestModifier(func(req *http.Request) *http.Request {
-		req.Header.Set("Authorization", basicAuth(publicKey, secretKey))
+		req.Header.Set("Authorization", basicAuth(config.PublicKey, config.SecretKey))
 		return req
 	})
 

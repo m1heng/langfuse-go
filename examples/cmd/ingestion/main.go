@@ -2,13 +2,21 @@ package main
 
 import (
 	"context"
+	"time"
 
 	"github.com/m1heng/langfuse-go"
 	"github.com/m1heng/langfuse-go/model"
 )
 
 func main() {
-	l := langfuse.New(context.Background())
+	l, _ := langfuse.New(context.Background(), &langfuse.Config{
+		ApiClientConfig: &langfuse.APIConfig{
+			LangfuseHost: "https://cloud.langfuse.com",
+			PublicKey:    "public-key",
+			SecretKey:    "secret-key",
+		},
+		AutoFlushInterval: 500 * time.Millisecond,
+	})
 
 	trace, err := l.Trace(&model.Trace{Name: "test-trace"})
 	if err != nil {
