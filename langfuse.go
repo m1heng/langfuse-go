@@ -25,11 +25,15 @@ type APIConfig = api.ClientConfig
 
 type Config struct {
 	ApiClientConfig   *APIConfig
-	AutoFlushInterval time.Duration
+	AutoFlushInterval *time.Duration
 }
 
-func New(ctx context.Context, config *Config) (*Langfuse, error) {
+func New(ctx context.Context, config *Config) *Langfuse {
 	client := api.New(config.ApiClientConfig)
+	flushInterval := defaultFlushInterval
+	if config.AutoFlushInterval != nil {
+		flushInterval = *config.AutoFlushInterval
+	}
 	l := &Langfuse{
 		flushInterval: defaultFlushInterval,
 		client:        client,
@@ -40,20 +44,20 @@ func New(ctx context.Context, config *Config) (*Langfuse, error) {
 					fmt.Println(err)
 				}
 			},
-			&config.AutoFlushInterval,
+			&flushInterval,
 		),
 	}
 
 	l.observer.Start(ctx)
-	return l, nil
+	return l
 }
 
 func ingest(ctx context.Context, client *api.Client, events []model.IngestionEvent) error {
-	req := api.Ingestion{
+	req := model.BatchIngestionRequest{
 		Batch: events,
 	}
 
-	res := api.IngestionResponse{}
+	res := model.IngestionResponse{}
 	return client.Ingestion(ctx, &req, &res)
 }
 
@@ -244,6 +248,14 @@ func (l *Langfuse) createTrace(traceName string) (string, error) {
 
 func (l *Langfuse) Flush(ctx context.Context) {
 	l.observer.Wait(ctx)
+}
+
+func (l *Langfuse) GetPrompt(req *model.GetPromptRequest) (*model.TextPrompt, *model.ChatPrompt, error) {
+	return l.client.GetPrompt(&model.GetPromptRequest{
+		PromptName: req.PromptName,
+		Version:    req.Version,
+		Label:      req.Label,
+	})
 }
 
 func buildID(id *string) string {

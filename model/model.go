@@ -130,3 +130,58 @@ type Event struct {
 }
 
 type M map[string]interface{}
+
+// BasePrompt defines model for BasePrompt.
+type BasePrompt struct {
+	Config interface{} `json:"config"`
+
+	// Labels List of deployment labels of this prompt version.
+	Labels []string `json:"labels"`
+	Name   string   `json:"name"`
+
+	// Tags List of tags. Used to filter via UI and API. The same across versions of a prompt.
+	Tags    []string `json:"tags"`
+	Version int      `json:"version"`
+}
+
+type ChatPromptItem struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type ChatPrompt struct {
+	BasePrompt
+	Prompt []ChatPromptItem `json:"prompt"`
+}
+
+type TextPrompt struct {
+	BasePrompt
+	Prompt string `json:"prompt"`
+}
+
+type GetPromptRequest struct {
+	PromptName string
+	Version    *int32
+	Label      *string
+}
+
+type BatchIngestionRequest struct {
+	Batch []IngestionEvent `json:"batch"`
+}
+
+type IngestionSuccess struct {
+	ID     string `json:"id"`
+	Status int    `json:"status"`
+}
+
+type IngestionError struct {
+	ID      string `json:"id"`
+	Status  int    `json:"status"`
+	Message string `json:"message"`
+	Error   string `json:"error"`
+}
+
+type IngestionResponse struct {
+	Successes []IngestionSuccess `json:"successes"`
+	Errors    []IngestionError   `json:"errors"`
+}
