@@ -25,11 +25,15 @@ type APIConfig = api.ClientConfig
 
 type Config struct {
 	ApiClientConfig   *APIConfig
-	AutoFlushInterval time.Duration
+	AutoFlushInterval *time.Duration
 }
 
-func New(ctx context.Context, config *Config) (*Langfuse, error) {
+func New(ctx context.Context, config *Config) *Langfuse {
 	client := api.New(config.ApiClientConfig)
+	flushInterval := defaultFlushInterval
+	if config.AutoFlushInterval != nil {
+		flushInterval = *config.AutoFlushInterval
+	}
 	l := &Langfuse{
 		flushInterval: defaultFlushInterval,
 		client:        client,
@@ -40,12 +44,12 @@ func New(ctx context.Context, config *Config) (*Langfuse, error) {
 					fmt.Println(err)
 				}
 			},
-			&config.AutoFlushInterval,
+			&flushInterval,
 		),
 	}
 
 	l.observer.Start(ctx)
-	return l, nil
+	return l
 }
 
 func ingest(ctx context.Context, client *api.Client, events []model.IngestionEvent) error {

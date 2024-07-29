@@ -156,3 +156,9 @@ type TextPrompt struct {
 	BasePrompt
 	Prompt string `json:"prompt"`
 }
+
+type GetPromptRequest struct {
+	PromptName string
+	Version    *int32
+	Label      *string
+}
