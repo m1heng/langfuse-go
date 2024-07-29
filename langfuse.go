@@ -246,6 +246,10 @@ func (l *Langfuse) Flush(ctx context.Context) {
 	l.observer.Wait(ctx)
 }
 
+func (l *Langfuse) GetPrompt(req *api.GetPromptRequest) (*model.TextPrompt, *model.ChatPrompt, error) {
+	return l.client.GetPrompt(req)
+}
+
 func buildID(id *string) string {
 	if id == nil {
 		return uuid.New().String()

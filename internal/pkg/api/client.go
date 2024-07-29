@@ -3,10 +3,14 @@ package api
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
+	"errors"
 	"net/http"
 	"os"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/henomis/restclientgo"
+	"github.com/m1heng/langfuse-go/model"
 )
 
 const (
@@ -15,6 +19,7 @@ const (
 
 type Client struct {
 	restClient *restclientgo.RestClient
+	resty      *resty.Client
 }
 
 type ClientConfig struct {
@@ -32,6 +37,11 @@ func New(config *ClientConfig) *Client {
 		}
 	}
 
+	client := resty.New().
+		SetBaseURL(config.LangfuseHost).
+		SetAuthScheme("Basic").
+		SetAuthToken(basicAuth(config.PublicKey, config.SecretKey))
+
 	restClient := restclientgo.New(config.LangfuseHost)
 	restClient.SetRequestModifier(func(req *http.Request) *http.Request {
 		req.Header.Set("Authorization", basicAuth(config.PublicKey, config.SecretKey))
@@ -40,11 +50,48 @@ func New(config *ClientConfig) *Client {
 
 	return &Client{
 		restClient: restClient,
+		resty:      client,
 	}
 }
 
 func (c *Client) Ingestion(ctx context.Context, req *Ingestion, res *IngestionResponse) error {
 	return c.restClient.Post(ctx, req, res)
+}
+
+// GetPromptRequest defines request for GetPrompt.
+// ref: https://api.reference.langfuse.com/#get-/api/public/v2/prompts/-promptName-
+func (c *Client) GetPrompt(req *GetPromptRequest) (*model.TextPrompt, *model.ChatPrompt, error) {
+	rawJSON := map[string]interface{}{}
+	r := c.resty.R().
+		SetResult(&rawJSON).
+		SetPathParam("promptName", req.PromptName)
+	if req.Version != nil {
+		r.SetQueryParam("version", string(*req.Version))
+	}
+	if req.Label != nil {
+		r.SetQueryParam("label", *req.Label)
+	}
+
+	resp, err := r.Get("/api/public/v2/prompts/{promptName}")
+
+	if err != nil {
+		return nil, nil, err
+	}
+	if rawJSON == nil {
+		return nil, nil, errors.New("empty response")
+	}
+
+	if rawJSON["type"] == "text" {
+		textPrompt := &model.TextPrompt{}
+		err = json.Unmarshal(resp.Body(), textPrompt)
+		return textPrompt, nil, err
+	} else if rawJSON["type"] == "chat" {
+		chatPrompt := &model.ChatPrompt{}
+		err = json.Unmarshal(resp.Body(), chatPrompt)
+		return nil, chatPrompt, err
+	}
+	return nil, nil, errors.New("unknown prompt type")
+
 }
 
 func basicAuth(publicKey, secretKey string) string {

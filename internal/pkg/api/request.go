@@ -18,6 +18,12 @@ type Ingestion struct {
 	Batch []model.IngestionEvent `json:"batch"`
 }
 
+type GetPromptRequest struct {
+	PromptName string
+	Version    *int32
+	Label      *string
+}
+
 func (t *Ingestion) Path() (string, error) {
 	return "/api/public/ingestion", nil
 }

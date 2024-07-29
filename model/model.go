@@ -130,3 +130,29 @@ type Event struct {
 }
 
 type M map[string]interface{}
+
+// BasePrompt defines model for BasePrompt.
+type BasePrompt struct {
+	Config interface{} `json:"config"`
+
+	// Labels List of deployment labels of this prompt version.
+	Labels []string `json:"labels"`
+	Name   string   `json:"name"`
+
+	// Tags List of tags. Used to filter via UI and API. The same across versions of a prompt.
+	Tags    []string `json:"tags"`
+	Version int      `json:"version"`
+}
+
+type ChatPrompt struct {
+	BasePrompt
+	Prompt []struct {
+		Role    string `json:"role"`
+		Content string `json:"content"`
+	} `json:"prompt"`
+}
+
+type TextPrompt struct {
+	BasePrompt
+	Prompt string `json:"prompt"`
+}
