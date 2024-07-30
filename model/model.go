@@ -144,12 +144,14 @@ type BasePrompt struct {
 	Version int      `json:"version"`
 }
 
+type ChatPromptItem struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
 type ChatPrompt struct {
 	BasePrompt
-	Prompt []struct {
-		Role    string `json:"role"`
-		Content string `json:"content"`
-	} `json:"prompt"`
+	Prompt []ChatPromptItem `json:"prompt"`
 }
 
 type TextPrompt struct {
