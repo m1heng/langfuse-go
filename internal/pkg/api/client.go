@@ -36,6 +36,9 @@ func New(config *ClientConfig) *Client {
 			SecretKey:    os.Getenv("LANGFUSE_SECRET_KEY"),
 		}
 	}
+	if config.LangfuseHost == "" {
+		config.LangfuseHost = langfuseDefaultEndpoint
+	}
 
 	client := resty.New().
 		SetBaseURL(config.LangfuseHost).
@@ -44,7 +47,7 @@ func New(config *ClientConfig) *Client {
 
 	restClient := restclientgo.New(config.LangfuseHost)
 	restClient.SetRequestModifier(func(req *http.Request) *http.Request {
-		req.Header.Set("Authorization", basicAuth(config.PublicKey, config.SecretKey))
+		req.Header.Set("Authorization", "Basic "+basicAuth(config.PublicKey, config.SecretKey))
 		return req
 	})
 
@@ -62,8 +65,10 @@ func (c *Client) Ingestion(ctx context.Context, req *Ingestion, res *IngestionRe
 // ref: https://api.reference.langfuse.com/#get-/api/public/v2/prompts/-promptName-
 func (c *Client) GetPrompt(req *GetPromptRequest) (*model.TextPrompt, *model.ChatPrompt, error) {
 	rawJSON := map[string]interface{}{}
+	errResp := map[string]interface{}{}
 	r := c.resty.R().
 		SetResult(&rawJSON).
+		SetError(&errResp).
 		SetPathParam("promptName", req.PromptName)
 	if req.Version != nil {
 		r.SetQueryParam("version", string(*req.Version))
@@ -81,6 +86,13 @@ func (c *Client) GetPrompt(req *GetPromptRequest) (*model.TextPrompt, *model.Cha
 		return nil, nil, errors.New("empty response")
 	}
 
+	if resp.StatusCode() != http.StatusOK {
+		if errResp["error"] != nil {
+			return nil, nil, errors.New(errResp["error"].(string))
+		}
+		return nil, nil, errors.New(resp.Status())
+	}
+
 	if rawJSON["type"] == "text" {
 		textPrompt := &model.TextPrompt{}
 		err = json.Unmarshal(resp.Body(), textPrompt)
@@ -96,5 +108,5 @@ func (c *Client) GetPrompt(req *GetPromptRequest) (*model.TextPrompt, *model.Cha
 
 func basicAuth(publicKey, secretKey string) string {
 	auth := publicKey + ":" + secretKey
-	return "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
+	return base64.StdEncoding.EncodeToString([]byte(auth))
 }

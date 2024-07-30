@@ -250,8 +250,12 @@ func (l *Langfuse) Flush(ctx context.Context) {
 	l.observer.Wait(ctx)
 }
 
-func (l *Langfuse) GetPrompt(req *api.GetPromptRequest) (*model.TextPrompt, *model.ChatPrompt, error) {
-	return l.client.GetPrompt(req)
+func (l *Langfuse) GetPrompt(req *model.GetPromptRequest) (*model.TextPrompt, *model.ChatPrompt, error) {
+	return l.client.GetPrompt(&api.GetPromptRequest{
+		PromptName: req.PromptName,
+		Version:    req.Version,
+		Label:      req.Label,
+	})
 }
 
 func buildID(id *string) string {
