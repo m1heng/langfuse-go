@@ -9,13 +9,14 @@ import (
 )
 
 func main() {
-	l, _ := langfuse.New(context.Background(), &langfuse.Config{
+	duration := 500 * time.Millisecond
+	l := langfuse.New(context.Background(), &langfuse.Config{
 		ApiClientConfig: &langfuse.APIConfig{
 			LangfuseHost: "https://cloud.langfuse.com",
 			PublicKey:    "public-key",
 			SecretKey:    "secret-key",
 		},
-		AutoFlushInterval: 500 * time.Millisecond,
+		AutoFlushInterval: &duration,
 	})
 
 	trace, err := l.Trace(&model.Trace{Name: "test-trace"})
