@@ -14,6 +14,14 @@ const (
 	IngestionEventTypeEventCreate      = "event-create"
 )
 
+type LangfuseObservationType string
+
+const (
+	ObservationTypeSpan       LangfuseObservationType = "SPAN"
+	ObservationTypeGeneration LangfuseObservationType = "GENERATION"
+	ObservationTypeEvent      LangfuseObservationType = "EVENT"
+)
+
 type IngestionEvent struct {
 	Type      IngestionEventType `json:"type"`
 	ID        string             `json:"id"`
@@ -23,18 +31,19 @@ type IngestionEvent struct {
 }
 
 type Trace struct {
-	ID        string     `json:"id,omitempty"`
-	Timestamp *time.Time `json:"timestamp,omitempty"`
-	Name      string     `json:"name,omitempty"`
-	UserID    string     `json:"userId,omitempty"`
-	Input     any        `json:"input,omitempty"`
-	Output    any        `json:"output,omitempty"`
-	SessionID string     `json:"sessionId,omitempty"`
-	Release   string     `json:"release,omitempty"`
-	Version   string     `json:"version,omitempty"`
-	Metadata  any        `json:"metadata,omitempty"`
-	Tags      []string   `json:"tags,omitempty"`
-	Public    bool       `json:"public,omitempty"`
+	ID          string     `json:"id,omitempty"`
+	Timestamp   *time.Time `json:"timestamp,omitempty"`
+	Name        string     `json:"name,omitempty"`
+	UserID      string     `json:"userId,omitempty"`
+	Input       any        `json:"input,omitempty"`
+	Output      any        `json:"output,omitempty"`
+	SessionID   string     `json:"sessionId,omitempty"`
+	Release     string     `json:"release,omitempty"`
+	Version     string     `json:"version,omitempty"`
+	Metadata    any        `json:"metadata,omitempty"`
+	Tags        []string   `json:"tags,omitempty"`
+	Public      bool       `json:"public,omitempty"`
+	Environment string     `json:"environment,omitempty"`
 }
 
 type ObservationLevel string
@@ -47,24 +56,28 @@ const (
 )
 
 type Generation struct {
-	TraceID             string           `json:"traceId,omitempty"`
-	Name                string           `json:"name,omitempty"`
-	StartTime           *time.Time       `json:"startTime,omitempty"`
-	Metadata            any              `json:"metadata,omitempty"`
-	Input               any              `json:"input,omitempty"`
-	Output              any              `json:"output,omitempty"`
-	Level               ObservationLevel `json:"level,omitempty"`
-	StatusMessage       string           `json:"statusMessage,omitempty"`
-	ParentObservationID string           `json:"parentObservationId,omitempty"`
-	Version             string           `json:"version,omitempty"`
-	ID                  string           `json:"id,omitempty"`
-	EndTime             *time.Time       `json:"endTime,omitempty"`
-	CompletionStartTime *time.Time       `json:"completionStartTime,omitempty"`
-	Model               string           `json:"model,omitempty"`
-	ModelParameters     any              `json:"modelParameters,omitempty"`
-	Usage               Usage            `json:"usage,omitempty"`
-	PromptName          string           `json:"promptName,omitempty"`
-	PromptVersion       int              `json:"promptVersion,omitempty"`
+	TraceID             string             `json:"traceId,omitempty"`
+	Name                string             `json:"name,omitempty"`
+	StartTime           *time.Time         `json:"startTime,omitempty"`
+	Metadata            any                `json:"metadata,omitempty"`
+	Input               any                `json:"input,omitempty"`
+	Output              any                `json:"output,omitempty"`
+	Level               ObservationLevel   `json:"level,omitempty"`
+	StatusMessage       string             `json:"statusMessage,omitempty"`
+	ParentObservationID string             `json:"parentObservationId,omitempty"`
+	Version             string             `json:"version,omitempty"`
+	ID                  string             `json:"id,omitempty"`
+	EndTime             *time.Time         `json:"endTime,omitempty"`
+	CompletionStartTime *time.Time         `json:"completionStartTime,omitempty"`
+	Model               string             `json:"model,omitempty"`
+	ModelParameters     map[string]any     `json:"modelParameters,omitempty"`
+	Usage               Usage              `json:"usage,omitempty"`
+	UsageDetails        map[string]float64 `json:"usageDetails,omitempty"`
+	CostDetails         map[string]float64 `json:"costDetails,omitempty"`
+	Prompt              *Prompt            `json:"prompt,omitempty"`
+	PromptName          string             `json:"promptName,omitempty"`
+	PromptVersion       int                `json:"promptVersion,omitempty"`
+	Environment         string             `json:"environment,omitempty"`
 }
 
 type Usage struct {
@@ -113,6 +126,7 @@ type Span struct {
 	Version             string           `json:"version,omitempty"`
 	ID                  string           `json:"id,omitempty"`
 	EndTime             *time.Time       `json:"endTime,omitempty"`
+	Environment         string           `json:"environment,omitempty"`
 }
 
 type Event struct {
@@ -127,6 +141,18 @@ type Event struct {
 	ParentObservationID string           `json:"parentObservationId,omitempty"`
 	Version             string           `json:"version,omitempty"`
 	ID                  string           `json:"id,omitempty"`
+	Environment         string           `json:"environment,omitempty"`
+}
+
+type Prompt struct {
+	Name       string `json:"name"`
+	Version    int    `json:"version"`
+	IsFallback bool   `json:"isFallback"`
+}
+
+type TraceContext struct {
+	TraceID             string `json:"traceId"`
+	ParentObservationID string `json:"parentObservationId,omitempty"`
 }
 
 type M map[string]interface{}
